@@ -1,5 +1,7 @@
 # 划词翻译 · Selection Translator
 
+[![CI](https://github.com/seeyouyousee/selection-translator/actions/workflows/ci.yml/badge.svg)](https://github.com/seeyouyousee/selection-translator/actions/workflows/ci.yml)
+
 一个 Chrome MV3 扩展：**选中网页文字 → 点“翻译” → 自动弹出对照窗口**，面向精读学习；也能把输入框里写好的文字翻译后原位替换。
 
 > A Chrome MV3 extension: unit-by-unit bilingual reading on any page, and in-place translation of what you type in an input box. One request per action, no retries.
