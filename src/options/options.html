@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>划词翻译 · 设置</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --card: #ffffff;
+        --fg: #1f2328;
+        --muted: #6b7280;
+        --border: #e2e5e9;
+        --accent: #2563eb;
+        --danger: #c0392b;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #15181d;
+          --card: #1c2026;
+          --fg: #e6e9ee;
+          --muted: #98a2b3;
+          --border: #2e343d;
+          --accent: #60a5fa;
+          --danger: #f87171;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      }
+      main { max-width: 720px; margin: 0 auto; padding: 36px 20px 64px; }
+      header { margin-bottom: 22px; }
+      h1 { font-size: 21px; margin: 0 0 6px; letter-spacing: 0.01em; }
+      .sub { margin: 0; color: var(--muted); font-size: 13px; }
+      section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px 20px 20px;
+        margin-bottom: 16px;
+      }
+      h2 {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--muted);
+        letter-spacing: 0.06em;
+        margin: 0 0 14px;
+        text-transform: uppercase;
+      }
+      label.field, .field { display: block; margin-bottom: 14px; }
+      .label, label > span.label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+      input[type="text"], input[type="password"], select {
+        width: 100%;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--card);
+        color: var(--fg);
+        font: inherit;
+        font-size: 13px;
+      }
+      input:focus, select:focus { outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 1px; }
+      .row { display: flex; gap: 8px; align-items: center; }
+      .row input[type="password"], .row input[type="text"] { flex: 1 1 auto; }
+      .hint { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+      .opt { display: inline-flex; align-items: center; gap: 7px; margin-right: 18px; font-size: 13px; cursor: pointer; }
+      .opt input { margin: 0; accent-color: var(--accent); }
+      button {
+        height: 34px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--card);
+        color: var(--fg);
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      button:hover { border-color: var(--muted); }
+      button.primary { background: var(--accent); border-color: transparent; color: #fff; }
+      button.primary:hover { filter: brightness(1.06); }
+      .status { font-size: 12.5px; color: var(--muted); }
+      .status.ok { color: #15803d; }
+      .status.err { color: var(--danger); }
+      .about ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5px; }
+      .about li { margin-bottom: 4px; }
+      .sep { height: 1px; background: var(--border); margin: 2px 0 16px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>划词翻译</h1>
+        <p class="sub">选中网页文字 → 点“翻译” → 弹出窗口；双语对照按整段排列，供精读学习。</p>
+      </header>
+
+      <section>
+        <h2>翻译服务</h2>
+        <label class="field">
+          <span class="label">Base URL</span>
+          <input id="baseUrl" type="text" spellcheck="false" placeholder="https://api.deepseek.com/v1" />
+        </label>
+        <p class="hint">任意 OpenAI 兼容端点，例如 https://api.deepseek.com/v1 、https://api.openai.com/v1 。</p>
+
+        <label class="field">
+          <span class="label">API Key</span>
+          <span class="row">
+            <input id="apiKey" type="password" spellcheck="false" autocomplete="off" placeholder="sk-..." />
+            <button id="toggleKey" type="button">显示</button>
+          </span>
+        </label>
+
+        <label class="field">
+          <span class="label">模型</span>
+          <input id="model" type="text" spellcheck="false" placeholder="deepseek-chat" />
+        </label>
+
+        <div class="row">
+          <button id="testBtn" type="button">测试连接</button>
+          <span id="testStatus" class="status"></span>
+        </div>
+
+        <label class="opt" style="margin-top: 14px">
+          <input id="disableThinking" type="checkbox" /> 关闭模型思考（发送关闭参数）
+        </label>
+        <p class="hint">
+          思考模式会让模型先自问自答、明显变慢。开启后会发送
+          <code>reasoning_effort: "none"</code>、<code>enable_thinking: false</code>、<code>thinking: {"type":"disabled"}</code>。
+          若网关报「未知参数」错误，取消勾选。
+        </p>
+      </section>
+
+      <section>
+        <h2>翻译方向</h2>
+        <label class="field">
+          <span class="label">阅读目标语言（选中网页文字时）</span>
+          <select id="targetLang"></select>
+        </label>
+        <label class="field">
+          <span class="label">输入目标语言（输入框里选中文字时）</span>
+          <select id="inputTargetLang"></select>
+        </label>
+        <p class="hint">
+          阅读目标语言用于把网页文字翻成你的母语；输入目标语言用于把你写的内容翻成要发出去的语言。
+          选中的内容如果已经是目标语言，就不调用翻译。
+        </p>
+      </section>
+
+      <section>
+        <h2>展示</h2>
+        <div class="field">
+          <span class="label">默认模式</span>
+          <label class="opt"><input type="radio" name="mode" value="bilingual" /> 双语对照（整段）</label>
+          <label class="opt"><input type="radio" name="mode" value="mono" /> 单语（仅译文）</label>
+        </div>
+        <div class="field">
+          <span class="label">窗口大小</span>
+          <label class="opt"><input type="radio" name="preset" value="sm" /> 小</label>
+          <label class="opt"><input type="radio" name="preset" value="md" /> 中</label>
+          <label class="opt"><input type="radio" name="preset" value="lg" /> 大</label>
+        </div>
+        <p class="hint">
+          窗口可拖动标题栏移动、拖右下角微调大小，下次沿用。切换档位会覆盖手动调整过的尺寸。
+        </p>
+        <button id="resetDims" type="button">恢复默认窗口尺寸 / 位置</button>
+      </section>
+
+      <section>
+        <h2>保存</h2>
+        <div class="row">
+          <button id="saveBtn" class="primary" type="button">保存设置</button>
+          <span id="saveStatus" class="status"></span>
+        </div>
+        <div class="sep" style="margin-top: 16px"></div>
+        <p class="hint">改动需要保存后生效；已打开的翻译窗口刷新页面后按新配置工作。</p>
+      </section>
+
+      <section class="about">
+        <h2>说明</h2>
+        <ul>
+          <li>翻译窗口渲染在独立 Shadow DOM 中，不会改动网页本身的内容与样式。</li>
+          <li>选中的文字只会发送到你上面配置的翻译服务，不会发往其他地方。</li>
+          <li><code>Esc</code> 或窗口右上角 <code>×</code> 关闭窗口；点窗口外不会关闭。</li>
+        </ul>
+      </section>
+    </main>
+    <script src="options.js"></script>
+  </body>
+</html>

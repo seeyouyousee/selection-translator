@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "划词翻译 · Selection Translator",
+  "version": "0.1.0",
+  "description": "选中网页文字，点一下弹出翻译窗口；支持整段双语对照（学习用）与单语两种展示。",
+  "minimum_chrome_version": "109",
+  "permissions": ["storage", "contextMenus"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "action": {
+    "default_title": "划词翻译设置"
+  },
+  "options_page": "options.html"
+}
