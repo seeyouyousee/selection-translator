@@ -1,5 +1,7 @@
 # 划词翻译 · Selection Translator
 
+[English](./README.en.md) | 简体中文
+
 [![CI](https://github.com/seeyouyousee/selection-translator/actions/workflows/ci.yml/badge.svg)](https://github.com/seeyouyousee/selection-translator/actions/workflows/ci.yml)
 
 一个 Chrome MV3 扩展：**选中网页文字 → 点“翻译” → 自动弹出对照窗口**，面向精读学习；也能把输入框里写好的文字翻译后原位替换。
@@ -52,6 +54,7 @@ pnpm build          # 产物在 dist/
 | 模型 | 如 `deepseek-chat`、`gpt-4o-mini` |
 | 阅读目标语言 | 选中网页文字时翻成的语言，默认中文 |
 | 输入目标语言 | 输入框里选中文字时翻成的语言，默认英语 |
+| 关闭模型思考 | 默认开启：请求里显式发送关闭思考参数；网关报错会自动去掉并记住 |
 | 默认展示模式 | 双语 / 单语（窗口里切换会同步成新的默认） |
 | 窗口大小 | 小 420×420 / 中 520×560 / 大 680×720；手动拖拽后的尺寸优先 |
 | 测试连接 | 请求 `/models` 探测端点与 Key |
@@ -91,7 +94,7 @@ pnpm build          # 产物在 dist/
 
 选区先按 DOM 段落分组，段内用规则切好单元，然后把单元用编号标记串回**一段原文**（`unit0 [[0]] unit1 [[1]] …`）发给模型——原文只发一次，不重复。模型被明确告知「这是一个完整段落，整体翻译」，并可以丢掉某个标记来合并相邻两块。回来后按标记切分译文；标记必须自洽（有序、不越界、不重复、每片非空），**不自洽就把整段当作一个整体**，不报错、不重试。全程只有一次 API 请求。规则切分同时用于「已是目标语言」时的本地展示（不调 API）。
 
-**不使用 thinking**：请求体只有 `model` / `messages` / `stream: false` / `response_format`，不传 `reasoning_effort`、`thinking` 等参数，模型就是设置里选的那个普通对话模型。
+**关闭思考（默认开启）**：请求里显式发送 `reasoning_effort: "none"`、`enable_thinking: false`、`thinking: {"type": "disabled"}`。如果网关不认识这些参数而返回 400，会自动去掉、重试一次并记住，之后不再发。可在设置页关掉这个行为。
 
 ## 隐私
 
@@ -137,7 +140,6 @@ pnpm timing       # 计时诊断（DELAY=1500 pnpm timing 模拟模型耗时）
 ## 已知边界
 
 - 只处理主框架（`all_frames: false`），不处理 iframe 内选区
-- `<input>` / `<textarea>` 内的选区不处理
 - 语言识别是启发式：**判不准时宁可翻译**，不会把外文误当原文直接展示
 - 标记是软约束：模型可能全丢（→ 整段一对）或全留（→ 本地粒度），都不会多打请求
 - 本地切分决定粒度上限：模型只能合并、不能切得更细
